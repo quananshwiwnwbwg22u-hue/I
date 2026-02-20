@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R9 VIP - ELITE SYSTEM</title>
+<style>
+:root {
+--bg-dark: #07020a;
+--panel-bg: #100818;
+--accent-purple: #9d00ff;
+--accent-pink: #ff007f;
+--row-bg: rgba(255, 255, 255, 0.04);
+--text-secondary: #8a7ea0;
+--console-bg: #040107;
+--whatsapp-green: #25d366;
+--safe-green: #00ff88;
+}
+
+@keyframes rotate-border { 100% { filter: hue-rotate(360deg); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+@keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(157, 0, 255, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(157, 0, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(157, 0, 255, 0); } }
+@keyframes pulse-green { 0% { transform: scale(1); } 70% { transform: scale(1.03); box-shadow: 0 0 20px rgba(37, 211, 102, 0.4); } 100% { transform: scale(1); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+body { background-color: var(--bg-dark); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+#bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
+
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+.toast { background: rgba(16, 8, 24, 0.95); border-left: 4px solid var(--accent-purple); color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; font-weight: bold; transform: translateX(120%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.toast.show { transform: translateX(0); }
+
+/* --- LOGIN --- */
+#login-screen { width: 380px; padding: 3px; background: var(--accent-purple); border-radius: 30px; box-shadow: 0 0 30px rgba(157, 0, 255, 0.5); z-index: 10; }
+.login-inner { background: #0d0616; padding: 30px; border-radius: 28px; text-align: center; display: flex; flex-direction: column; gap: 15px; }
+.login-logo { font-size: 45px; font-weight: 900; color: white; margin: 0; text-transform: uppercase; text-shadow: 0 0 15px var(--accent-purple); }
+.rules-box { background: rgba(157, 0, 255, 0.08); border: 1px solid rgba(157, 0, 255, 0.2); padding: 12px; border-radius: 12px; text-align: left; font-size: 10px; color: #ccc; }
+.rules-box b { color: #ff3366; display: block; margin-bottom: 5px; font-size: 11px; }
+.input-key { width: 100%; padding: 16px; border-radius: 10px; background:#000; border:2px solid #221530; color:#fff; text-align:center; font-weight:bold; letter-spacing:2px; box-sizing: border-box; }
+.input-key.error { animation: shake 0.4s; border-color: #ff0044; }
+.btn-buy-wa { background: linear-gradient(90deg, #25d366, #128c7e); color: white; text-decoration: none; padding: 14px; border-radius: 10px; font-size: 12px; font-weight: 900; animation: pulse-green 2s infinite; display: block; }
+
+/* --- PAINEL --- */
+#main-panel { display: none; width: 420px; background-color: var(--panel-bg); border: 2px solid var(--accent-purple); border-radius: 20px; overflow: hidden; flex-direction: row; }
+.sidebar { width: 75px; background-color: #0c0612; display: flex; flex-direction: column; align-items: center; padding: 25px 0; border-right: 1px solid #221530; }
+.nav-item { width: 45px; height: 45px; margin-bottom: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--text-secondary); font-size: 1.3rem; }
+.nav-item.active { background-color: var(--accent-purple); color: white; box-shadow: 0 0 15px var(--accent-purple); }
+.main-content { flex: 1; display: flex; flex-direction: column; }
+.user-info-bar { background: rgba(157, 0, 255, 0.1); padding: 10px 15px; border-bottom: 1px solid rgba(157, 0, 255, 0.2); display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.content { padding: 20px; display: none; height: 260px; overflow-y: auto; }
+.content.active { display: block; }
+.header h2 { font-size: 14px; color: var(--accent-purple); margin: 0 0 15px 0; letter-spacing: 2px; text-transform: uppercase; }
+.row { background: var(--row-bg); padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
+/* INJEÇÃO E CONSOLE */
+.console-area {
+background: #000;
+border: 1px solid #221530;
+border-radius: 8px;
+margin-top: 15px;
+padding: 10px;
+font-family: 'Courier New', Courier, monospace;
+font-size: 10px;
+color: #00ff88;
+height: 100px;
+overflow-y: auto;
+text-shadow: 0 0 5px #00ff8844;
+}
+.console-line { margin-bottom: 4px; border-left: 2px solid var(--accent-purple); padding-left: 5px; }
+
+input[type=range] { -webkit-appearance: none; width: 100%; height: 18px; background: #1e132b; border-radius: 10px; margin-top: 15px; outline: none; background-image: linear-gradient(var(--accent-purple), var(--accent-purple)); background-size: 0% 100%; background-repeat: no-repeat; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; background: var(--accent-purple); border-radius: 50%; border: 2px solid #fff; }
+
+.btn-inject { width: 100%; background: var(--accent-purple); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; animation: pulse-purple 2s infinite; }
+.switch { width: 45px; height: 24px; position: relative; display: inline-block; }
+.switch input { display: none; }
+.slider-round { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #2a1e38; border-radius: 20px; cursor: pointer; transition: 0.4s; }
+.slider-round:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.4s; }
+input:checked + .slider-round { background-color: var(--accent-purple); }
+input:checked + .slider-round:before { transform: translateX(21px); }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="toast-container"></div>
+
+<div id="login-screen">
+<div class="login-inner">
+<h1 class="login-logo">Painel R9</h1>
+<input type="password" id="keyInput" class="input-key" placeholder="SUA KEY VIP">
+<div id="login-status" style="font-size: 10px; color: var(--text-secondary); margin-top: -5px;">Tentativas: <span id="tries">3</span></div>
+<button class="btn-inject" style="animation:none" onclick="startAuth()">VERIFICAR ACESSO</button>
+<div class="rules-box">
+<b>🚨 REGRAS DE USO:</b>
+• Proibido repassar a Key (Ban HWID).<br>
+• Uso exclusivo em 1 dispositivo.
+</div>
+<a href="https://wa.me/5511980746995?text=Olá%20quero%20adquirir%20a%20key%20do%20painel%20R9💜" target="_blank" class="btn-buy-wa">🛒 ADQUIRIR KEY R9💜</a>
+</div>
+</div>
+
+<div id="main-panel">
+<div class="sidebar">
+<div class="nav-item active" onclick="openTab(event, 'aimbot')">◎</div>
+<div class="nav-item" onclick="openTab(event, 'arma')">∏</div>
+<div class="nav-item" onclick="openTab(event, 'diversos')">⊞</div>
+<div class="nav-item" onclick="openTab(event, 'seguranca')">🛡</div>
+<div class="nav-item" onclick="openTab(event, 'injecao')">✳</div>
+</div>
+
+<div class="main-content">
+<div class="user-info-bar">
+<div>User: <span style="color:var(--accent-purple)">VIP_OPERATOR</span></div>
+<div style="color:var(--safe-green); font-weight:bold; display:flex; align-items:center; gap:5px;"><div style="width:8px; height:8px; background:var(--safe-green); border-radius:50%; animation:blink 1.5s infinite;"></div> STATUS: ONLINE</div>
+</div>
+
+<div id="aimbot" class="content active">
+<div class="header"><h2>R9 - AIMBOT</h2></div>
+<div class="row"><span>Aimbot Ativo</span><label class="switch"><input type="checkbox" onchange="toastMsg('Aimbot', this)"><span class="slider-round"></span></label></div>
+<div style="display:flex; justify-content:space-between; margin-top:20px; font-size:14px; font-weight:bold;"><span>FOV</span><span id="fV" style="color:var(--accent-purple)">0</span></div>
+<input type="range" min="0" max="20" value="0" id="fovSlider" oninput="updateFov(this)">
+</div>
+<div id="arma" class="content">
+<div class="header"><h2>ARMAS</h2></div>
+<div class="row"><span>No Recoil</span><label class="switch"><input type="checkbox" onchange="toastMsg('No Recoil', this)"><span class="slider-round"></span></label></div>
+</div>
+<div id="diversos" class="content">
+<div class="header"><h2>DIVERSOS</h2></div>
+<div class="row"><span>FPS Boost</span><label class="switch"><input type="checkbox" onchange="toastMsg('FPS Boost', this)"><span class="slider-round"></span></label></div>
+</div>
+<div id="seguranca" class="content">
+<div class="header"><h2>ESCUDO</h2></div>
+<div class="row"><span>Anti-Ban Ultra</span><label class="switch"><input type="checkbox" onchange="toastMsg('Anti-Ban', this)"><span class="slider-round"></span></label></div>
+</div>
+
+<div id="injecao" class="content">
+<div class="header"><h2>SISTEMA DE INJEÇÃO</h2></div>
+<button class="btn-inject" onclick="runInjection('FF NORMAL')">✳ INJETAR FF NORMAL</button>
+<button class="btn-inject" style="margin-top:10px" onclick="runInjection('FF MAX')">✳ INJETAR FF MAX</button>
+
+<div class="console-area" id="consoleBox">
+<div class="console-line">> Aguardando ordem de injeção...</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// PARTICULAS FONDO
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+let particles = [];
+const mouse = { x: null, y: null, radius: 100 };
+window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+class Particle {
+constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.size = Math.random()*2+1; this.baseX = this.x; this.baseY = this.y; this.density = (Math.random()*30)+1; }
+draw() { ctx.fillStyle = '#9d00ff'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); }
+update() {
+let dx = mouse.x - this.x; let dy = mouse.y - this.y;
+let distance = Math.sqrt(dx*dx + dy*dy);
+if (distance < mouse.radius) { this.x -= (dx/distance)*5; this.y -= (dy/distance)*5; }
+else { this.x += (this.baseX - this.x)*0.05; this.y += (this.baseY - this.y)*0.05; }
+}
+}
+for(let i=0; i<120; i++) particles.push(new Particle());
+function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { p.draw(); p.update(); }); requestAnimationFrame(animate); }
+animate();
+
+// LÓGICA DE INJEÇÃO (PALAVRAS EMBAIXO)
+function runInjection(game) {
+const consoleBox = document.getElementById('consoleBox');
+consoleBox.innerHTML = ""; // Limpa console
+showToast(`Iniciando injeção: ${game}`);
+
+const messages = [
+`> Localizando processo do ${game}...`,
+`> Abrindo bypass de segurança...`,
+`> Injetando DLL na memória...`,
+`> Hooking Direct3D...`,
+`> Sincronizando módulos VIP...`,
+`> [SUCESSO] ${game} MODIFICADO!`
+];
+
+messages.forEach((msg, index) => {
+setTimeout(() => {
+const line = document.createElement('div');
+line.className = 'console-line';
+line.style.color = index === messages.length - 1 ? "#00ff88" : "#9d00ff";
+line.innerHTML = msg;
+consoleBox.appendChild(line);
+consoleBox.scrollTop = consoleBox.scrollHeight;
+if(index === messages.length -1) showToast(`${game} ATIVADO!`);
+}, index * 600);
+});
+}
+
+// LOGIN E OUTROS
+let attempts = 3;
+function startAuth() {
+const input = document.getElementById('keyInput');
+if (attempts <= 0) return showToast("ACESSO BLOQUEADO!");
+if (input.value.toUpperCase() === 'S') {
+showToast("BEM-VINDO AO PAINEL R9");
+document.getElementById('login-screen').style.display = 'none';
+document.getElementById('main-panel').style.display = 'flex';
+} else {
+attempts--; document.getElementById('tries').innerText = attempts;
+input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 500);
+showToast(`KEY INVÁLIDA! RESTAM ${attempts}`);
+}
+}
+
+function showToast(msg) {
+const container = document.getElementById('toast-container');
+const t = document.createElement('div');
+t.className = 'toast'; t.innerHTML = `⚠️ <b>R9:</b> ${msg}`;
+container.appendChild(t); setTimeout(() => t.classList.add('show'), 100);
+setTimeout(() => { t.classList.remove('show'); 
